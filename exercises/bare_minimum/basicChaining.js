@@ -10,11 +10,20 @@
 
 var fs = require('fs');
 var Promise = require('bluebird');
+var request = require('request');
 
-
+Promise.promisifyAll(fs);
+Promise.promisifyAll(request);
 
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
-  // TODO
+  return fs.readFileAsync(readFilePath)
+    .then(function(content) {
+      content = content.toString();
+      content = content.split('\n');
+      return content[0];
+    }).then(function(line) {
+      return request('https://api.github.com/users/' + line).pipe(fs.createWriteStream(writeFilePath));
+    });
 };
 
 // Export these functions so we can test them
